@@ -1,8 +1,7 @@
 name: custom_keyboard
 description: "Flutter custom keyboard "
 version: 0.0.1
-homepage: https://github.com/SotirisSid/FLutterr_Custom_keyboard
-
+homepage: https://github.com/SotirisSid/Flutter_Custom_keyboard
 environment:
   sdk: ^3.5.4
   flutter: ">=1.17.0"
