@@ -88,6 +88,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              // Special character toggle and backspace buttons (at the top)
               SizedBox(
                 height: widget.keyboardHeight * 0.13,
                 child: Row(
@@ -104,6 +105,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
                       },
                     ),
                     Spacer(),
+                    // Backspace button on the top row
                     IconButton(
                       icon: Icon(Icons.backspace_rounded),
                       color: widget.textColor,
@@ -197,7 +199,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
             ],
           ),
         ),
-        // Shift button and space button
+        // Bottom Row (Shift button, Space button, ',' button, '.' button, Backspace button)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -205,8 +207,8 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
               onPressed: toggleShift,
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(widget.keybordButtonColor),
-                padding: MaterialStateProperty.all(EdgeInsets.all(10)),
+                    WidgetStateProperty.all(widget.keybordButtonColor),
+                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
               ),
               child: Icon(
                 Icons.arrow_circle_up_outlined,
@@ -222,14 +224,64 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(widget.keybordButtonColor),
-                padding: MaterialStateProperty.all(EdgeInsets.all(10)),
+                    WidgetStateProperty.all(widget.keybordButtonColor),
+                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
               ),
               child: Text(
                 'Space',
                 style: TextStyle(
                     color: widget.textColor,
                     fontSize: widget.keyboardHeight * 0.05),
+              ),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                inputValue += ',';
+                widget.onChange(inputValue);
+              },
+              style: ButtonStyle(
+                backgroundColor:
+                    WidgetStateProperty.all(widget.keybordButtonColor),
+                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
+              ),
+              child: Text(
+                ',',
+                style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: widget.keyboardHeight * 0.05),
+              ),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                inputValue += '.';
+                widget.onChange(inputValue);
+              },
+              style: ButtonStyle(
+                backgroundColor:
+                    WidgetStateProperty.all(widget.keybordButtonColor),
+                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
+              ),
+              child: Text(
+                '.',
+                style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: widget.keyboardHeight * 0.05),
+              ),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: deleteLastChar,
+              style: ButtonStyle(
+                backgroundColor:
+                    WidgetStateProperty.all(widget.keybordButtonColor),
+                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
+              ),
+              child: Icon(
+                Icons.backspace_rounded,
+                color: widget.textColor,
+                size: widget.keyboardHeight * 0.05,
               ),
             ),
           ],
