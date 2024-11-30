@@ -19,6 +19,6 @@ To start using the custom keyboard in your Flutter application, follow these ste
 dependencies:
   custom_keyboard:
     git:
-      url: https://github.com/SotirisSid/FLutterr_Custom_keyboard.git
+      url: https://github.com/SotirisSid/Flutter_Custom_keyboard.git
       ref: main
 ```

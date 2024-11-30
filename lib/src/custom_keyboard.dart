@@ -34,10 +34,9 @@ class CustomKeyboard extends StatefulWidget {
 
 class _CustomKeyboardState extends State<CustomKeyboard> {
   late String inputValue = '';
-  bool isSpecialPressed =
-      false; // Flag to toggle between normal and special character keyboards
+  bool isSpecialPressed = false;
+  bool isShiftPressed = false; // Flag for shift button (uppercase/lowercase)
 
-  // Defining the layout for the keyboard rows (numbers and characters)
   final List<List<String>> keyboardRows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -45,8 +44,8 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
     ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
   ];
 
-  // Special characters layout
   final List<List<String>> specialCharRows = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['+', '-', '=', '/', '!', '@', '#', r'$', '%'],
     ['^', '&', '*', '(', ')', '_', ':', ';', '"'],
     ['<', '>', '?', '.', ',', '`', '~'],
@@ -62,6 +61,21 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
     });
   }
 
+  void toggleShift() {
+    setState(() {
+      isShiftPressed = !isShiftPressed;
+    });
+  }
+
+  void deleteLastChar() {
+    if (inputValue.isNotEmpty) {
+      setState(() {
+        inputValue = inputValue.substring(0, inputValue.length - 1);
+        widget.onChange(inputValue);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -74,43 +88,34 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // The "Special Characters" button to toggle between keyboards
               SizedBox(
                 height: widget.keyboardHeight * 0.13,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextButton(
+                    IconButton(
+                      icon: Icon(Icons.language_rounded),
+                      color: widget.textColor,
+                      iconSize: widget.keyboardHeight * 0.06,
                       onPressed: () {
                         setState(() {
                           isSpecialPressed = !isSpecialPressed;
                         });
                       },
-                      style: ButtonStyle(
-                        elevation: widget.elevation,
-                        backgroundColor: WidgetStateProperty.all<Color>(
-                          widget.keybordButtonColor,
-                        ),
-                        overlayColor: WidgetStateProperty.all<Color>(
-                          widget.onTapColor,
-                        ),
-                      ),
-                      child: Text(
-                        'Special Characters',
-                        style: TextStyle(
-                          color: widget.textColor,
-                          fontSize: widget.keyboardHeight * 0.06,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.backspace_rounded),
+                      color: widget.textColor,
+                      iconSize: widget.keyboardHeight * 0.06,
+                      onPressed: deleteLastChar,
                     ),
                   ],
                 ),
               ),
 
-              // The main keyboard (number and letters)
+              // Main keyboard layout (numbers and letters)
               if (!isSpecialPressed) ...[
-                // Normal key rows
                 ...keyboardRows.map((row) {
                   return SizedBox(
                     height: widget.keyboardHeight * 0.13,
@@ -121,7 +126,10 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
                           width: widget.keyboardWidth * 0.08,
                           child: TextButton(
                             onPressed: () {
-                              inputValue += key;
+                              String buttonKey = isShiftPressed
+                                  ? key.toUpperCase()
+                                  : key.toLowerCase();
+                              inputValue += buttonKey;
                               widget.onChange(inputValue);
                             },
                             style: ButtonStyle(
@@ -175,7 +183,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
                               key,
                               style: TextStyle(
                                 color: widget.textColor,
-                                fontSize: widget.keyboardHeight * 0.08,
+                                fontSize: widget.keyboardHeight * 0.06,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -188,6 +196,44 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
               ],
             ],
           ),
+        ),
+        // Shift button and space button
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: toggleShift,
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(widget.keybordButtonColor),
+                padding: MaterialStateProperty.all(EdgeInsets.all(10)),
+              ),
+              child: Text(
+                'Shift',
+                style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: widget.keyboardHeight * 0.05),
+              ),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                inputValue += ' ';
+                widget.onChange(inputValue);
+              },
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(widget.keybordButtonColor),
+                padding: MaterialStateProperty.all(EdgeInsets.all(10)),
+              ),
+              child: Text(
+                'Space',
+                style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: widget.keyboardHeight * 0.05),
+              ),
+            ),
+          ],
         ),
       ],
     );
