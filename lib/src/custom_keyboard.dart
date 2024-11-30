@@ -35,7 +35,7 @@ class CustomKeyboard extends StatefulWidget {
 class _CustomKeyboardState extends State<CustomKeyboard> {
   late String inputValue = '';
   bool isSpecialPressed = false;
-  bool isShiftPressed = false; // Flag for shift button (uppercase/lowercase)
+  bool isShiftPressed = false;
 
   final List<List<String>> keyboardRows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
@@ -46,9 +46,9 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
 
   final List<List<String>> specialCharRows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-    ['+', '-', '=', '/', '!', '@', '#', r'$', '%'],
-    ['^', '&', '*', '(', ')', '_', ':', ';', '"'],
-    ['<', '>', '?', '.', ',', '`', '~'],
+    ['!', '@', '#', '\$', '%', '^', '&', '*', '(', ')'],
+    ['-', '_', '=', '+', '[', ']', '{', '}', '|', '\\'],
+    [';', ':', '\'', '"', ',', '.', '/', '?', '`', '~'],
   ];
 
   @override
@@ -67,6 +67,12 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
     });
   }
 
+  void toggleSpecial() {
+    setState(() {
+      isSpecialPressed = !isSpecialPressed;
+    });
+  }
+
   void deleteLastChar() {
     if (inputValue.isNotEmpty) {
       setState(() {
@@ -78,6 +84,9 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
 
   @override
   Widget build(BuildContext context) {
+    final rowHeight = widget.keyboardHeight / 5;
+    final keyWidth = widget.keyboardWidth / 10;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -86,205 +95,144 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
           width: widget.keyboardWidth,
           color: widget.backgroundColor,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Special character toggle and backspace buttons (at the top)
-              SizedBox(
-                height: widget.keyboardHeight * 0.13,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              // Main keyboard layout
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.language_rounded),
-                      color: widget.textColor,
-                      iconSize: widget.keyboardHeight * 0.06,
-                      onPressed: () {
-                        setState(() {
-                          isSpecialPressed = !isSpecialPressed;
-                        });
-                      },
+                    for (var row
+                        in (isSpecialPressed ? specialCharRows : keyboardRows))
+                      SizedBox(
+                        height: rowHeight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: row.map((key) {
+                            return SizedBox(
+                              width: keyWidth,
+                              child: TextButton(
+                                onPressed: () {
+                                  String buttonKey = isShiftPressed
+                                      ? key.toUpperCase()
+                                      : key.toLowerCase();
+
+                                  setState(() {
+                                    inputValue += buttonKey;
+                                    widget.onChange(inputValue);
+
+                                    // Auto-unpress Shift after pressing a letter
+                                    if (isShiftPressed) {
+                                      isShiftPressed = false;
+                                    }
+                                  });
+                                },
+                                style: ButtonStyle(
+                                  elevation: widget.elevation,
+                                  backgroundColor: WidgetStateProperty.all(
+                                      widget.keybordButtonColor),
+                                  overlayColor: WidgetStateProperty.all(
+                                      widget.onTapColor),
+                                ),
+                                child: Text(
+                                  isShiftPressed ? key.toUpperCase() : key,
+                                  style: TextStyle(
+                                    color: widget.textColor,
+                                    fontSize: rowHeight * 0.4,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              // Bottom row with shift, special, space, and backspace buttons
+              SizedBox(
+                height: rowHeight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Shift Button
+                    ElevatedButton(
+                      onPressed: toggleShift,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          isShiftPressed
+                              ? Colors.blue
+                              : widget.keybordButtonColor,
+                        ),
+                        padding:
+                            WidgetStateProperty.all(const EdgeInsets.all(10)),
+                      ),
+                      child: Icon(
+                        Icons.arrow_upward_rounded,
+                        color: widget.textColor,
+                        size: rowHeight * 0.5,
+                      ),
                     ),
-                    Spacer(),
-                    // Backspace button on the top row
-                    IconButton(
-                      icon: Icon(Icons.backspace_rounded),
-                      color: widget.textColor,
-                      iconSize: widget.keyboardHeight * 0.06,
+                    // Special Characters Button
+                    ElevatedButton(
+                      onPressed: toggleSpecial,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(widget.keybordButtonColor),
+                        padding:
+                            WidgetStateProperty.all(const EdgeInsets.all(10)),
+                      ),
+                      child: Icon(
+                        Icons.language_rounded,
+                        color: widget.textColor,
+                        size: rowHeight * 0.5,
+                      ),
+                    ),
+                    // Space Bar
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            inputValue += ' ';
+                            widget.onChange(inputValue);
+                          });
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                              widget.keybordButtonColor),
+                          padding: WidgetStateProperty.all(
+                              const EdgeInsets.symmetric(vertical: 10)),
+                        ),
+                        child: Text(
+                          'Space',
+                          style: TextStyle(
+                            color: widget.textColor,
+                            fontSize: rowHeight * 0.4,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Backspace Button
+                    ElevatedButton(
                       onPressed: deleteLastChar,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(widget.keybordButtonColor),
+                        padding:
+                            WidgetStateProperty.all(const EdgeInsets.all(10)),
+                      ),
+                      child: Icon(
+                        Icons.backspace_rounded,
+                        color: widget.textColor,
+                        size: rowHeight * 0.5,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // Main keyboard layout (numbers and letters)
-              if (!isSpecialPressed) ...[
-                ...keyboardRows.map((row) {
-                  return SizedBox(
-                    height: widget.keyboardHeight * 0.13,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: row.map((key) {
-                        return SizedBox(
-                          width: widget.keyboardWidth * 0.08,
-                          child: TextButton(
-                            onPressed: () {
-                              String buttonKey = isShiftPressed
-                                  ? key.toUpperCase()
-                                  : key.toLowerCase();
-                              inputValue += buttonKey;
-                              widget.onChange(inputValue);
-                            },
-                            style: ButtonStyle(
-                              elevation: widget.elevation,
-                              backgroundColor: WidgetStateProperty.all<Color>(
-                                widget.keybordButtonColor,
-                              ),
-                              overlayColor: WidgetStateProperty.all<Color>(
-                                widget.onTapColor,
-                              ),
-                            ),
-                            child: Text(
-                              key,
-                              style: TextStyle(
-                                color: widget.textColor,
-                                fontSize: widget.keyboardHeight * 0.06,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                }),
-              ] else ...[
-                // Special character key rows
-                ...specialCharRows.map((row) {
-                  return SizedBox(
-                    height: widget.keyboardHeight * 0.17,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: row.map((key) {
-                        return SizedBox(
-                          width: widget.keyboardWidth * 0.08,
-                          child: TextButton(
-                            onPressed: () {
-                              inputValue += key;
-                              widget.onChange(inputValue);
-                            },
-                            style: ButtonStyle(
-                              elevation: widget.elevation,
-                              backgroundColor: WidgetStateProperty.all<Color>(
-                                widget.keybordButtonColor,
-                              ),
-                              overlayColor: WidgetStateProperty.all<Color>(
-                                widget.onTapColor,
-                              ),
-                            ),
-                            child: Text(
-                              key,
-                              style: TextStyle(
-                                color: widget.textColor,
-                                fontSize: widget.keyboardHeight * 0.06,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                }),
-              ],
             ],
           ),
-        ),
-        // Bottom Row (Shift button, Space button, ',' button, '.' button, Backspace button)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: toggleShift,
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(widget.keybordButtonColor),
-                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
-              ),
-              child: Icon(
-                Icons.arrow_circle_up_outlined,
-                color: widget.textColor,
-                size: widget.keyboardHeight * 0.05,
-              ),
-            ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                inputValue += ' ';
-                widget.onChange(inputValue);
-              },
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(widget.keybordButtonColor),
-                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
-              ),
-              child: Text(
-                'Space',
-                style: TextStyle(
-                    color: widget.textColor,
-                    fontSize: widget.keyboardHeight * 0.05),
-              ),
-            ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                inputValue += ',';
-                widget.onChange(inputValue);
-              },
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(widget.keybordButtonColor),
-                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
-              ),
-              child: Text(
-                ',',
-                style: TextStyle(
-                    color: widget.textColor,
-                    fontSize: widget.keyboardHeight * 0.05),
-              ),
-            ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                inputValue += '.';
-                widget.onChange(inputValue);
-              },
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(widget.keybordButtonColor),
-                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
-              ),
-              child: Text(
-                '.',
-                style: TextStyle(
-                    color: widget.textColor,
-                    fontSize: widget.keyboardHeight * 0.05),
-              ),
-            ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: deleteLastChar,
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(widget.keybordButtonColor),
-                padding: WidgetStateProperty.all(EdgeInsets.all(10)),
-              ),
-              child: Icon(
-                Icons.backspace_rounded,
-                color: widget.textColor,
-                size: widget.keyboardHeight * 0.05,
-              ),
-            ),
-          ],
         ),
       ],
     );
