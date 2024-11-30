@@ -208,11 +208,10 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
                     MaterialStateProperty.all(widget.keybordButtonColor),
                 padding: MaterialStateProperty.all(EdgeInsets.all(10)),
               ),
-              child: Text(
-                'Shift',
-                style: TextStyle(
-                    color: widget.textColor,
-                    fontSize: widget.keyboardHeight * 0.05),
+              child: Icon(
+                Icons.arrow_circle_up_outlined,
+                color: widget.textColor,
+                size: widget.keyboardHeight * 0.05,
               ),
             ),
             SizedBox(width: 10),
